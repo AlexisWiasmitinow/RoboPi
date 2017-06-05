@@ -10,5 +10,17 @@ servo_min = 150  # Min pulse length out of 4096
 servo_max = 600  # Max pulse length out of 4096
 
 #pwm.set_pwm(0, 0, servo_max)
+"""
+lookTo(servo_max)
+time.sleep(1)
+servoOff()
+time.sleep(1)
 lookTo(servo_min)
-#servoOff()
+time.sleep(1)
+servoOff()
+"""
+lightOn()
+time.sleep(1)
+lightOff()
+
+moveTo(200,20)
