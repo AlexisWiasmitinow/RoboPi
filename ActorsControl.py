@@ -3,12 +3,11 @@ import time
 import RPi.GPIO as GPIO
 from pinConfigurations import *
 import Adafruit_PCA9685
+import math
 pwm = Adafruit_PCA9685.PCA9685()
 pwm.set_pwm_freq(60)
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False) 
-GPIO.setup(airBlastPin,GPIO.OUT)
-GPIO.output(airBlastPin, 0)
 GPIO.setup(lightPin,GPIO.OUT)
 GPIO.output(lightPin, 0)
 
@@ -21,6 +20,10 @@ GPIO.setup(enableRightMotorPin,GPIO.OUT)
 GPIO.setup(enableLeftMotorPin,GPIO.OUT)
 GPIO.output(enableRightMotorPin, 1)
 GPIO.output(enableLeftMotorPin, 1)
+
+
+GPIO.setup(servoEnablePin,GPIO.OUT)
+GPIO.output(servoEnablePin, 1)
 
 debugActors=False
 debugActors2=True
@@ -58,13 +61,12 @@ def lightOff():
 	GPIO.output(lightPin, 0)
 
 def moveTo(speed,distance):
+	speed=speed*10
 	if debugActors2==True: print("distance:",distance)
+	if debugActors2==True: print("speed:",speed)
 	GPIO.output(enableRightMotorPin, 0)
 	GPIO.output(enableLeftMotorPin, 0)
-
-	stepsPerTurn=200
-	circumference=200
-	microsteps=1
+	stepsToGo=int(abs(distance)*stepsPerTurn*microsteps/wheelCircumference)
 	if 1*distance>0:
 		if debugActors2==True: print("forward:")
 		GPIO.output(dirLeftMotorPin, 0)
@@ -73,57 +75,50 @@ def moveTo(speed,distance):
 		if debugActors2==True: print("backward:")
 		GPIO.output(dirLeftMotorPin, 1)
 		GPIO.output(dirRightMotorPin, 0)
-	stepsPerSecond=speed*stepsPerTurn*microsteps/circumference*0.1
+	stepsPerSecond=speed*stepsPerTurn*microsteps/wheelCircumference*0.1
 	delay=1.0/stepsPerSecond
-	for i in range(0,abs(distance)):
-		if debugActors2==True: print("step, delay:",delay)
+	if debugActors2==True: print("delay:",delay)
+	for i in range(0,stepsToGo):
+		if debugActors==True: print("step, delay:",delay)
 		GPIO.output(stepLeftMotorPin, 1)
 		GPIO.output(stepRightMotorPin, 1)
 		time.sleep(delay)
 		GPIO.output(stepLeftMotorPin, 0)
 		GPIO.output(stepRightMotorPin, 0)
-		
+		time.sleep(delay)
+	time.sleep(delay*10)
 	GPIO.output(enableRightMotorPin, 1)
 	GPIO.output(enableLeftMotorPin, 1)
 
+def rotateTo(speed,angle):
+	if debugActors2==True: print("angle:",angle)
+	if debugActors2==True: print("speed:",speed)
+	trackCircleCircumference=math.pi*trackWidth*1.0
+	stepsToGo=int(abs(trackCircleCircumference*(angle*1.0/360)*stepsPerTurn*microsteps/wheelCircumference))
+	if debugActors2==True: print("steps:",stepsToGo)
+	stepsPerSecond=stepsToGo/speed
+	if debugActors2==True: print("steps:",stepsPerSecond)
+	delay=1.0/stepsPerSecond
 	
-	
-
-def motorDirection(direction):
-	if direction=="forward":
-		GPIO.output(dirBeltMotorPin, 0)
+	if debugActors2==True: print("delay:",delay)
+	GPIO.output(enableRightMotorPin, 0)
+	GPIO.output(enableLeftMotorPin, 0)
+	if angle>0:
+		GPIO.output(dirLeftMotorPin, 1)
+		GPIO.output(dirRightMotorPin, 1)
 	else:
-		GPIO.output(dirBeltMotorPin, 1)
-		
-def motorOn():
-	GPIO.output(enableBeltMotorPin, 0)
+		GPIO.output(dirLeftMotorPin, 0)
+		GPIO.output(dirRightMotorPin, 0)
 	
-def motorOff():
-	GPIO.output(enableBeltMotorPin, 1)
-	
-def flushBeltStart(previewSetting):
-	#print("flush start")
-	if previewSetting == "Standing Setup":
-		vibratorOff()
-		motorOff()
-		airBlastOff()
-	else:
-		#vibratorOff()
-		motorOn()
-		airBlastOn()
-		
-	
-def flushBeltStop(previewSetting):
-	#print("flush stop")
-	if previewSetting != "Standing Setup":
-		vibratorOn()
-		motorOn()
-	airBlastOff()
-
-def allOff():
-	vibratorOff()
-	motorOff()
-	airBlastOff()
-
-	
+	for i in range(0,stepsToGo):
+			if debugActors==True: print("step, delay:",delay)
+			GPIO.output(stepLeftMotorPin, 1)
+			GPIO.output(stepRightMotorPin, 1)
+			time.sleep(delay)
+			GPIO.output(stepLeftMotorPin, 0)
+			GPIO.output(stepRightMotorPin, 0)
+			time.sleep(delay)
+	time.sleep(delay*10)
+	GPIO.output(enableRightMotorPin, 1)
+	GPIO.output(enableLeftMotorPin, 1)
 	
