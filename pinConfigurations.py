@@ -12,3 +12,7 @@ stepsPerTurn=200
 wheelCircumference=378.0
 microsteps=16
 trackWidth=220
+servo_min = 150  # Min pulse length out of 4096
+servo_max = 600  # Max pulse length out of 4096
+maxViewAngle=15.0
+minViewAngle=-20.0

@@ -47,9 +47,16 @@ def DeleteImages(ControlImagePath):
 	#os.system("rm control_images/bad_size/image_* 2> /dev/null 1> /dev/null")
 	#os.system("rm control_images/bad_orient/image_* 2> /dev/null 1> /dev/null")
 	
-def lookTo(value):
+def lookTo(angle):
+	angle=max(angle,minViewAngle)
+	angle=min(angle,maxViewAngle)
+	if debugActors2==True: print("angle",angle)
+	if debugActors==True: print("value calculation",maxViewAngle-minViewAngle)
+	value=(angle-minViewAngle)*(servo_max-servo_min)/(maxViewAngle-minViewAngle)+servo_min
+	value=int(value)
+	if debugActors==True: print("angle",angle)
 	pwm.set_pwm(0, 0, value)
-	if debugActors==True: print("look to",value)
+	if debugActors2==True: print("look to",value)
 	
 def servoOff():
 	pwm.set_pwm(0,0,0)

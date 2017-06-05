@@ -8,21 +8,18 @@ import cv2
 #pwm = Adafruit_PCA9685.PCA9685()
 #pwm.set_pwm_freq(60)
 
-servo_min = 150  # Min pulse length out of 4096
-servo_max = 600  # Max pulse length out of 4096
 
 #pwm.set_pwm(0, 0, servo_max)
-"""
-lightOn()
 
-lookTo(servo_max)
+#lightOn()
+#lookTo(-30)
+#time.sleep(2)
+lookTo(-20)
+time.sleep(2)
+#lookTo(30)
 time.sleep(1)
 servoOff()
-time.sleep(1)
-lookTo(servo_min)
-time.sleep(1)
-servoOff()
-"""
+
 #time.sleep(1)
 lightOff()
 """
@@ -45,8 +42,9 @@ lightOn()
 lightOff()
 vs = PiVideoStream((1296,736)).start()
 time.sleep(1)
-for i in range(0,100):
-	print("frame")
+#for i in range(0,1):
+while (1):
+	#print("frame")
 	#frame = vs.readCropped(0,0,0,0)
 	frame = vs.read()
 	cv2.imshow('Test',frame)
