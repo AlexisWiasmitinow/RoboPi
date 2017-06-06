@@ -4,49 +4,52 @@ from ActorsControl import *
 import time
 from pivideostream import PiVideoStream
 import cv2
-#import Adafruit_PCA9685
-#pwm = Adafruit_PCA9685.PCA9685()
-#pwm.set_pwm_freq(60)
+from Tkinter import *
+from threading import Thread
+import time, multiprocessing, sys, getopt
+import numpy as np
+from GUI import *
 
-
-#pwm.set_pwm(0, 0, servo_max)
-
-#lightOn()
-#lookTo(-30)
-#time.sleep(2)
-lookTo(-20)
-time.sleep(2)
-#lookTo(30)
-time.sleep(1)
-servoOff()
-
-#time.sleep(1)
-lightOff()
-"""
-squareWidth=400
-rotateAngle=90
-moveTo(200,squareWidth)
-rotateTo(1,rotateAngle)
-moveTo(200,squareWidth)
-rotateTo(1,rotateAngle)
-moveTo(200,squareWidth)
-rotateTo(1,rotateAngle)
-moveTo(200,squareWidth)
-rotateTo(1,rotateAngle)
-"""
-lightOn()
-#rotateTo(1,-90)
-#moveTo(200,-200)
-#rotateTo(1,-45)
-#moveTo(200,1300)
-lightOff()
 vs = PiVideoStream((1296,736)).start()
 time.sleep(1)
-#for i in range(0,1):
-while (1):
+ActorsQueue=multiprocessing.Queue()
+t_actors=multiprocessing.Process(target=controlActors, args=(ActorsQueue,))
+t_actors.start()
+#ActorsQueue.put("mf200")
+#time.sleep(1)
+#ActorsQueue.put("mb200")
+
+def guiThread():
+	root = Tk()
+	root.geometry("600x400+50+50")
+	app = Window(root)
+	root.mainloop()
+
+t_gui=Thread(target=guiThread)
+t_gui.start()
+runVideo=True
+#for i in range(0,10):
+while (runVideo==True):
 	#print("frame")
 	#frame = vs.readCropped(0,0,0,0)
 	frame = vs.read()
-	cv2.imshow('Test',frame)
+	#red=frame[0,0,100]
+	#cv2.imshow('Test',frame)
+	b,g,r=cv2.split(frame)
+	ret, thresh = cv2.threshold(r,30,255,0)
+	cv2.imshow('Red',r)
+	cv2.imshow('Thresh',thresh)
+	time.sleep(0.02)
+	#print("shape: ",frame.shape)
+	#print("move: ",guiCommands['move'])
+	if guiCommands['move']!='none':
+		ActorsQueue.put(guiCommands['move'])
+		guiCommands['move']='none'
 	if cv2.waitKey(1) & 0xFF == ord('q'):
+		runVideo=False
 		break
+
+lightOff()
+ActorsQueue.put("quit")
+vs.stop()
+cv2.destroyAllWindows()

@@ -50,13 +50,13 @@ def DeleteImages(ControlImagePath):
 def lookTo(angle):
 	angle=max(angle,minViewAngle)
 	angle=min(angle,maxViewAngle)
-	if debugActors2==True: print("angle",angle)
+	if debugActors==True: print("angle",angle)
 	if debugActors==True: print("value calculation",maxViewAngle-minViewAngle)
 	value=(angle-minViewAngle)*(servo_max-servo_min)/(maxViewAngle-minViewAngle)+servo_min
 	value=int(value)
 	if debugActors==True: print("angle",angle)
 	pwm.set_pwm(0, 0, value)
-	if debugActors2==True: print("look to",value)
+	if debugActors==True: print("look to",value)
 	
 def servoOff():
 	pwm.set_pwm(0,0,0)
@@ -86,28 +86,31 @@ def moveTo(speed,distance):
 	delay=1.0/stepsPerSecond
 	if debugActors2==True: print("delay:",delay)
 	for i in range(0,stepsToGo):
-		if debugActors==True: print("step, delay:",delay)
+		if i<rampSteps:
+			stepDelay=delay*(rampSteps-i)*rampSlope
+			if debugActors==True: print("ramp up, delay:",stepDelay)
+		elif i>stepsToGo-rampSteps:
+			stepDelay=delay*(i-stepsToGo+rampSteps)*rampSlope
+			if debugActors==True: print("ramp down, delay:",stepDelay)
+		if debugActors==True: print("step, delay:",stepDelay)
 		GPIO.output(stepLeftMotorPin, 1)
 		GPIO.output(stepRightMotorPin, 1)
-		time.sleep(delay)
+		time.sleep(stepDelay)
 		GPIO.output(stepLeftMotorPin, 0)
 		GPIO.output(stepRightMotorPin, 0)
-		time.sleep(delay)
-	time.sleep(delay*10)
-	GPIO.output(enableRightMotorPin, 1)
-	GPIO.output(enableLeftMotorPin, 1)
+		time.sleep(stepDelay)
+	
 
 def rotateTo(speed,angle):
 	if debugActors2==True: print("angle:",angle)
 	if debugActors2==True: print("speed:",speed)
 	trackCircleCircumference=math.pi*trackWidth*1.0
 	stepsToGo=int(abs(trackCircleCircumference*(angle*1.0/360)*stepsPerTurn*microsteps/wheelCircumference))
-	if debugActors2==True: print("steps:",stepsToGo)
-	stepsPerSecond=stepsToGo/speed
-	if debugActors2==True: print("steps:",stepsPerSecond)
+	if debugActors==True: print("steps:",stepsToGo)
+	stepsPerSecond=speed*1000
+	if debugActors==True: print("steps:",stepsPerSecond)
 	delay=1.0/stepsPerSecond
-	
-	if debugActors2==True: print("delay:",delay)
+	if debugActors==True: print("delay:",delay)
 	GPIO.output(enableRightMotorPin, 0)
 	GPIO.output(enableLeftMotorPin, 0)
 	if angle>0:
@@ -118,14 +121,47 @@ def rotateTo(speed,angle):
 		GPIO.output(dirRightMotorPin, 0)
 	
 	for i in range(0,stepsToGo):
-			if debugActors==True: print("step, delay:",delay)
+			if i<rampSteps:
+				stepDelay=delay*(rampSteps-i)*rampSlope
+				if debugActors==True: print("ramp up, delay:",stepDelay)
+			elif i>stepsToGo-rampSteps:
+				stepDelay=delay*(i-stepsToGo+rampSteps)*rampSlope
+				if debugActors==True: print("ramp down, delay:",stepDelay)
+			if debugActors==True: print("step, delay:",stepDelay)
 			GPIO.output(stepLeftMotorPin, 1)
 			GPIO.output(stepRightMotorPin, 1)
-			time.sleep(delay)
+			time.sleep(stepDelay)
 			GPIO.output(stepLeftMotorPin, 0)
 			GPIO.output(stepRightMotorPin, 0)
-			time.sleep(delay)
-	time.sleep(delay*10)
+			time.sleep(stepDelay)
+	
+def disableMotors():
 	GPIO.output(enableRightMotorPin, 1)
 	GPIO.output(enableLeftMotorPin, 1)
+	if debugActors2==True: print("motors off")
 	
+def controlActors(ActorsQueue):
+	runActorsLoop=True
+	while runActorsLoop==True:
+		if ActorsQueue.empty()==False:
+			newCommand=ActorsQueue.get(False)
+			print("newcommand: ",newCommand)
+			if newCommand=="quit":
+				runActorsLoop=False
+			if newCommand=="stop":
+				disableMotors()
+			elif newCommand[:2]=="mf":
+				print("move forward: ",newCommand[2:]*1)
+				moveTo(200,int(newCommand[2:]))
+			elif newCommand[:2]=="mb":
+				print("move forward: ",newCommand[2:]*1)
+				moveTo(200,-1*int(newCommand[2:]))
+			elif newCommand[:2]=="tl":
+				print("turn left: ",newCommand[2:]*1)
+				rotateTo(1,-1*int(newCommand[2:]))
+			elif newCommand[:2]=="tr":
+				print("turn right: ",newCommand[2:]*1)
+				rotateTo(1,int(newCommand[2:]))
+		else:
+			time.sleep(0.2)
+			
