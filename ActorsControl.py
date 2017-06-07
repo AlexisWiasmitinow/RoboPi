@@ -50,7 +50,7 @@ def DeleteImages(ControlImagePath):
 def lookTo(angle):
 	angle=max(angle,minViewAngle)
 	angle=min(angle,maxViewAngle)
-	if debugActors==True: print("angle",angle)
+	if debugActors2==True: print("servo angle",angle)
 	if debugActors==True: print("value calculation",maxViewAngle-minViewAngle)
 	value=(angle-minViewAngle)*(servo_max-servo_min)/(maxViewAngle-minViewAngle)+servo_min
 	value=int(value)
@@ -100,7 +100,6 @@ def moveTo(speed,distance):
 		GPIO.output(stepRightMotorPin, 0)
 		time.sleep(stepDelay)
 	
-
 def rotateTo(speed,angle):
 	if debugActors2==True: print("angle:",angle)
 	if debugActors2==True: print("speed:",speed)

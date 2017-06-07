@@ -18,7 +18,7 @@ class PiVideoStream:
 		self.rawCapture = PiRGBArray(self.camera, size=resolution)
 		self.stream = self.camera.capture_continuous(self.rawCapture,format="bgr", use_video_port=True)
 		self.camera.sharpness=100
-		#self.camera.iso=100
+		self.camera.iso=500
 		# initialize the frame and the variable used to indicate
 		# if the thread should be stopped
 		self.frame = None
@@ -57,9 +57,11 @@ class PiVideoStream:
 		# indicate that the thread should be stopped
 		self.stopped = True
 		
-	def SetParam(self, shutter=100):
-		self.camera.shutter_speed=shutter
-		self.camera.iso=300
+	def SetParam(self):
+		self.camera.shutter_speed=500
+		self.camera.iso=500
+		print("shutter: ",self.camera.shutter_speed)
+		print("iso: ",self.camera.iso)
 		#self.camera.resolution = resolution
 		
 	def readCropped(self,x1,y1,x2,y2):
