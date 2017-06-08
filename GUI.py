@@ -1,3 +1,4 @@
+# coding: utf-8
 from Tkinter import *
 from ActorsControl import *
 from threading import Thread
@@ -13,6 +14,9 @@ guiCommands['angle']=0
 guiCommands['autoServo']=False
 guiCommands['autoRoll']=False
 guiCommands['autoTurn']=False
+guiCommands['previewRaw']=False
+guiCommands['previewComputed']=False
+#guiCommands['autoTurn']=False
 global GUI_Message
 
 class Window(Frame):
@@ -33,12 +37,12 @@ class Window(Frame):
 			self.forwardDist=StringVar()
 			Entry(self,textvariable=self.forwardDist,width=4).grid(row=SetRow, column=2)
 			self.forwardDist.set("1000")
-			Button(self, text="Vorwaerz", command=lambda: self.moveTo("forward")).grid(row=SetRow, column=3)
+			Button(self, text="Vor", command=lambda: self.moveTo("forward")).grid(row=SetRow, column=3)
 			Button(self, text="Hoch", command=lambda: self.lookTo(2)).grid(row=SetRow, column=6)
 			SetRow+=1
-			Button(self, text="Vorwaerz 300", command=lambda: self.moveTo("mf300")).grid(row=SetRow, column=3)
+			Button(self, text="V 300", command=lambda: self.moveTo("mf300")).grid(row=SetRow, column=3)
 			SetRow+=1
-			Button(self, text="Vorwaerz 50", command=lambda: self.moveTo("mf50")).grid(row=SetRow, column=3)
+			Button(self, text="V 50", command=lambda: self.moveTo("mf50")).grid(row=SetRow, column=3)
 			self.leftAngle=StringVar()
 			Entry(self,textvariable=self.leftAngle,width=4).grid(row=SetRow, column=0)
 			self.leftAngle.set("180")
@@ -49,21 +53,21 @@ class Window(Frame):
 			SetCol=0
 			Button(self, text="Links", command=lambda: self.moveTo("left")).grid(row=SetRow, column=SetCol)
 			SetCol+=1
-			Button(self, text="Links 90", command=lambda: self.moveTo("tl90")).grid(row=SetRow, column=SetCol)
+			Button(self, text="L 90°", command=lambda: self.moveTo("tl90")).grid(row=SetRow, column=SetCol)
 			SetCol+=1
-			Button(self, text="Links 10", command=lambda: self.moveTo("tl10")).grid(row=SetRow, column=SetCol)
+			Button(self, text="L 10°", command=lambda: self.moveTo("tl10")).grid(row=SetRow, column=SetCol)
 			SetCol+=1
 			Button(self, text="Stop", command=lambda: self.moveTo("stop")).grid(row=SetRow, column=SetCol)
 			SetCol+=1
-			Button(self, text="Rechts 10", command=lambda: self.moveTo("tr10")).grid(row=SetRow, column=SetCol)
+			Button(self, text="R 10°", command=lambda: self.moveTo("tr10")).grid(row=SetRow, column=SetCol)
 			SetCol+=1
-			Button(self, text="Rechts 90", command=lambda: self.moveTo("tr90")).grid(row=SetRow, column=SetCol)
+			Button(self, text="R 90°", command=lambda: self.moveTo("tr90")).grid(row=SetRow, column=SetCol)
 			SetCol+=1
 			Button(self, text="Rechts", command=lambda: self.moveTo("right")).grid(row=SetRow, column=SetCol)
 			SetRow+=1
-			Button(self, text="Rueckwaerz 50", command=lambda: self.moveTo("mb50")).grid(row=SetRow, column=3)
+			Button(self, text="Z 50", command=lambda: self.moveTo("mb50")).grid(row=SetRow, column=3)
 			SetRow+=1
-			Button(self, text="Rueckwaerz 300", command=lambda: self.moveTo("mb300")).grid(row=SetRow, column=3)
+			Button(self, text="Z 300", command=lambda: self.moveTo("mb300")).grid(row=SetRow, column=3)
 			SetRow+=1
 			self.lightText=StringVar()
 			Button(self, textvariable=self.lightText, command=self.lightSwitch).grid(row=SetRow, column=0)
@@ -78,7 +82,7 @@ class Window(Frame):
 			self.autoServoText=StringVar()
 			Button(self, textvariable=self.autoServoText, command=self.autoServoSwitch).grid(row=SetRow, column=SetCol,columnspan=2)
 			self.autoServoText.set("Schauen")
-			SetCol+=1
+			SetCol+=2
 			self.autoRollText=StringVar()
 			Button(self, textvariable=self.autoRollText, command=self.autoRollSwitch).grid(row=SetRow, column=SetCol,columnspan=2)
 			self.autoRollText.set("Rollen")
@@ -86,6 +90,18 @@ class Window(Frame):
 			self.autoTurnText=StringVar()
 			Button(self, textvariable=self.autoTurnText, command=self.autoTurnSwitch).grid(row=SetRow, column=SetCol,columnspan=2)
 			self.autoTurnText.set("Drehen")
+			SetCol+=1
+			self.previewText=StringVar()
+			Button(self, textvariable=self.previewText, command=self.previewSwitch).grid(row=SetRow, column=SetCol,columnspan=2)
+			self.previewText.set("Vorschau")
+			
+	def previewSwitch(self):
+		guiCommands['previewRaw']= not guiCommands['previewRaw']
+		print("preview Status",guiCommands['previewRaw'])
+		if guiCommands['previewRaw']==True:
+			self.previewText.set("Vorschau Aus")
+		else:
+			self.previewText.set("Vorschau An")
 			
 	def lightSwitch(self):
 		guiCommands['light']= not guiCommands['light']
