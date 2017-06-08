@@ -32,6 +32,7 @@ t_gui.start()
 runVideo=True
 #for i in range(0,10):
 while (runVideo==True):
+	runVideo=guiCommands['runVideo']
 	scale_factor=0.5
 	#print("frame")
 	#frame = vs.readCropped(0,0,0,0)

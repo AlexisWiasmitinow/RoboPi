@@ -16,7 +16,7 @@ guiCommands['autoRoll']=False
 guiCommands['autoTurn']=False
 guiCommands['previewRaw']=False
 guiCommands['previewComputed']=False
-#guiCommands['autoTurn']=False
+guiCommands['runVideo']=True
 global GUI_Message
 
 class Window(Frame):
@@ -94,6 +94,9 @@ class Window(Frame):
 			self.previewText=StringVar()
 			Button(self, textvariable=self.previewText, command=self.previewSwitch).grid(row=SetRow, column=SetCol,columnspan=2)
 			self.previewText.set("Vorschau")
+			SetRow+=1
+			SetCol=0
+			Button(self, text="Beenden", command=self.client_exit).grid(row=SetRow, column=SetCol,columnspan=2)
 			
 	def previewSwitch(self):
 		guiCommands['previewRaw']= not guiCommands['previewRaw']
@@ -179,14 +182,7 @@ class Window(Frame):
 
 
 	def client_exit(self):
+		guiCommands['runVideo']=False
 		print("exit pressed")
 		#SetLightTo(0)
-		GeneralSettings['RunVideo']=False
-		airBlastOn()
-		vibratorOff()
-		#time.sleep(int(GeneralSettings['FlushTime']))
-		motorOff()
-		stepperVars['runMotor']=False
-		self.t_motor.terminate()
-		allOff()
 		exit()
