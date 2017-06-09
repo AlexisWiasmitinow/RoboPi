@@ -17,6 +17,7 @@ guiCommands['autoTurn']=False
 guiCommands['previewRaw']=False
 guiCommands['previewComputed']=False
 guiCommands['runVideo']=True
+guiCommands['emptyCommandQueue']=False
 global GUI_Message
 
 class Window(Frame):
@@ -86,17 +87,19 @@ class Window(Frame):
 			self.autoRollText=StringVar()
 			Button(self, textvariable=self.autoRollText, command=self.autoRollSwitch).grid(row=SetRow, column=SetCol,columnspan=2)
 			self.autoRollText.set("Rollen")
-			SetCol+=1
+			SetCol+=2
 			self.autoTurnText=StringVar()
 			Button(self, textvariable=self.autoTurnText, command=self.autoTurnSwitch).grid(row=SetRow, column=SetCol,columnspan=2)
 			self.autoTurnText.set("Drehen")
-			SetCol+=1
+			SetCol+=2
 			self.previewText=StringVar()
 			Button(self, textvariable=self.previewText, command=self.previewSwitch).grid(row=SetRow, column=SetCol,columnspan=2)
 			self.previewText.set("Vorschau")
-			SetRow+=1
-			SetCol=0
+			SetCol+=2
+			#SetRow+=1
+			#SetCol=0
 			Button(self, text="Beenden", command=self.client_exit).grid(row=SetRow, column=SetCol,columnspan=2)
+			
 			
 	def previewSwitch(self):
 		guiCommands['previewRaw']= not guiCommands['previewRaw']
@@ -119,23 +122,26 @@ class Window(Frame):
 		guiCommands['autoServo']= not guiCommands['autoServo']
 		print("autoServo Status",guiCommands['autoServo'])
 		if guiCommands['autoServo']==True:
-			self.autoServoText.set("Schauen Aus")
+			self.autoServoText.set("Schau Aus")
 		else:
 			self.autoServoText.set("Schauen")
+			
 	def autoRollSwitch(self):
 		guiCommands['autoRoll']= not guiCommands['autoRoll']
 		print("autoRoll Status",guiCommands['autoRoll'])
 		if guiCommands['autoRoll']==True:
-			self.autoRollText.set("Rollen Aus")
+			self.autoRollText.set("Roll Aus")
 		else:
 			self.autoRollText.set("Rollen")
+			guiCommands['emptyCommandQueue']=True
 	def autoTurnSwitch(self):
 		guiCommands['autoTurn']= not guiCommands['autoTurn']
 		print("autoTurn Status",guiCommands['autoTurn'])
 		if guiCommands['autoTurn']==True:
-			self.autoTurnText.set("Drehen Aus")
+			self.autoTurnText.set("Dreh Aus")
 		else:
 			self.autoTurnText.set("Drehen")
+			guiCommands['emptyCommandQueue']=True
 	
 	def lookTo(self,command):
 		print("before look to: ",guiCommands['angle'])
@@ -175,6 +181,7 @@ class Window(Frame):
 			disableMotors()
 			lookTo(0)
 			guiCommands['angle']=0
+			guiCommands['emptyCommandQueue']=True
 		else:
 			commandNew=command
 		print("update function command",commandNew)

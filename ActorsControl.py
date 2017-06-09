@@ -69,22 +69,22 @@ def lightOff():
 
 def moveTo(speed,distance):
 	speed=speed*10
-	if debugActors2==True: print("distance:",distance)
-	if debugActors2==True: print("speed:",speed)
+	if debugActors==True: print("distance:",distance)
+	if debugActors==True: print("speed:",speed)
 	GPIO.output(enableRightMotorPin, 0)
 	GPIO.output(enableLeftMotorPin, 0)
 	stepsToGo=int(abs(distance)*stepsPerTurn*microsteps/wheelCircumference)
 	if 1*distance>0:
-		if debugActors2==True: print("forward:")
+		if debugActors==True: print("forward:")
 		GPIO.output(dirLeftMotorPin, 0)
 		GPIO.output(dirRightMotorPin, 1)
 	else:
-		if debugActors2==True: print("backward:")
+		if debugActors==True: print("backward:")
 		GPIO.output(dirLeftMotorPin, 1)
 		GPIO.output(dirRightMotorPin, 0)
 	stepsPerSecond=speed*stepsPerTurn*microsteps/wheelCircumference*0.1
 	delay=1.0/stepsPerSecond
-	if debugActors2==True: print("delay:",delay)
+	if debugActors==True: print("delay:",delay)
 	for i in range(0,stepsToGo):
 		if i<rampSteps:
 			stepDelay=delay*(rampSteps-i)*rampSlope
@@ -143,6 +143,7 @@ def controlActors(ActorsQueue):
 	runActorsLoop=True
 	while runActorsLoop==True:
 		if ActorsQueue.empty()==False:
+			print("queue size: ",ActorsQueue.qsize())
 			newCommand=ActorsQueue.get(False)
 			print("newcommand: ",newCommand)
 			if newCommand=="quit":

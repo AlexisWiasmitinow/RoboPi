@@ -23,7 +23,7 @@ lookTo(0)
 
 def guiThread():
 	root = Tk()
-	root.geometry("600x300+0+0")
+	root.geometry("800x220+0+0")
 	app = Window(root)
 	root.mainloop()
 
@@ -37,20 +37,30 @@ while (runVideo==True):
 	#print("frame")
 	#frame = vs.readCropped(0,0,0,0)
 	frame = vs.read()
-	grayImage = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+	imageHeight,imageWidth=frame.shape[:2]
+	frame_small=cv2.resize(frame,(int(imageWidth*scale_factor),int(imageHeight*scale_factor)),interpolation = cv2.INTER_AREA)
+	grayImage = cv2.cvtColor(frame_small, cv2.COLOR_BGR2GRAY)
 	imageHeight,imageWidth=grayImage.shape[:2]
-	frame_small=cv2.resize(grayImage,(int(imageWidth*scale_factor),int(imageHeight*scale_factor)),interpolation = cv2.INTER_AREA)
 	#red=frame[0,0,100]
 	#cv2.imshow('Test',frame)
-	imageHeight,imageWidth=frame_small.shape[:2]
+	#imageHeight,imageWidth=frame_small.shape[:2]
 	#b,g,r=cv2.split(frame_small)
 	#r=r-b-g
 	if imageWidth>0:
 		#print("guiCommands['previewRaw'] 2 ",guiCommands['previewRaw'])
-		ret, thresh = cv2.threshold(frame_small,100,255,0)
+		ret, thresh = cv2.threshold(grayImage,100,255,0)
 		
 		(cnts, _) = cv2.findContours(thresh, cv2.RETR_EXTERNAL, 2)
 		cnts = sorted(cnts, key = cv2.contourArea, reverse = True)[:10]
+		if  guiCommands['previewRaw']==True:
+			cv2.namedWindow('Vorschau',cv2.WINDOW_NORMAL)
+			cv2.resizeWindow('Vorschau',500,150)
+			cv2.moveWindow('Vorschau',0,290)
+		"""	
+		if guiCommands['emptyCommandQueue']==True:
+			guiCommands['emptyCommandQueue']=False
+			ActorsQueue.clear()
+		"""
 		if len(cnts)>0:
 			mainContour=cnts[0]
 			box = cv2.minAreaRect(mainContour)
@@ -59,14 +69,15 @@ while (runVideo==True):
 			boxWidth=box[1][0]
 			#print("guiCommands['previewRaw'] ",guiCommands['previewRaw'])
 			if guiCommands['previewRaw']==True:
-				print("preview")
-				cv2.imshow('Thresh',thresh)
+				#print("preview")
+				cv2.imshow('Vorschau',thresh)
 				boxPoints = cv2.cv.BoxPoints(box)
 				boxPoints = np.array(boxPoints, dtype="int")
-				cv2.drawContours(frame, mainContour, -1, (255, 0, 0), 2)
-				cv2.drawContours(frame, [boxPoints], -1, ( 0,255, 0), 2)
-				cv2.putText(frame," Box Dimensions W: "+str(box[0][0])+" H: "+str(box[0][1])+" Horiz: "+str(hOffset)+" Vert: "+str(vOffset)+" width: "+str(boxWidth),(10,30),cv2.FONT_HERSHEY_SIMPLEX,0.45, (0, 0, 255), 2)
-				cv2.imshow('Computed',frame)
+				cv2.drawContours(frame_small, mainContour, -1, (255, 0, 0), 2)
+				cv2.drawContours(frame_small, [boxPoints], -1, ( 0,255, 0), 2)
+				cv2.putText(frame_small," Box Dimensions W: "+str(box[0][0])+" H: "+str(box[0][1])+" Horiz: "+str(hOffset)+" Vert: "+str(vOffset)+" width: "+str(boxWidth),(10,30),cv2.FONT_HERSHEY_SIMPLEX,0.45, (0, 0, 255), 2)
+				#cv2.imshow('Computed',frame)
+				cv2.imshow('Vorschau',frame_small)
 			else:
 				cv2.destroyAllWindows()
 			proportionality=0.05
@@ -86,7 +97,7 @@ while (runVideo==True):
 			targetWidth=100
 			sizeOffset=targetWidth-boxWidth
 			#distance measurement
-			proportionality2=0.5
+			proportionality2=0.8
 			if sizeOffset<0:
 				moveCommand="mb"+str(int(abs(sizeOffset*proportionality2)))
 			else:
@@ -95,11 +106,15 @@ while (runVideo==True):
 				print("moveCommand roll: ",moveCommand)
 				ActorsQueue.put(moveCommand)
 		elif  guiCommands['previewRaw']==True:
-			cv2.imshow('Raw',frame_small)
+			cv2.imshow('Vorschau',frame_small)
+			#cv2.imshow('Raw',frame_small)
 			#cv2.imshow('Thresh',thresh)
 		else:
 			cv2.destroyAllWindows()
-	#time.sleep(0.02)
+	if ActorsQueue.qsize()>5:		
+		time.sleep(2)
+	else:
+		time.sleep(0.2)
 	#print("shape: ",frame.shape)
 	#print("move: ",guiCommands['move'])
 	if guiCommands['move']!='none':
