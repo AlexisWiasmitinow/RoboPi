@@ -16,5 +16,5 @@ servo_min = 150  # Min pulse length out of 4096
 servo_max = 600  # Max pulse length out of 4096
 maxViewAngle=15.0
 minViewAngle=-20.0
-rampSteps=10
+rampSteps=20
 rampSlope=1

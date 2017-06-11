@@ -14,10 +14,14 @@ guiCommands['angle']=0
 guiCommands['autoServo']=False
 guiCommands['autoRoll']=False
 guiCommands['autoTurn']=False
-guiCommands['previewRaw']=False
+guiCommands['previewRaw']=True
 guiCommands['previewComputed']=False
 guiCommands['runVideo']=True
 guiCommands['emptyCommandQueue']=False
+guiCommands['targetsize']=100
+guiCommands['threshold']=100
+guiCommands['rotation']=100
+guiCommands['drive']=100
 global GUI_Message
 
 class Window(Frame):
@@ -40,16 +44,27 @@ class Window(Frame):
 			self.forwardDist.set("1000")
 			Button(self, text="Vor", command=lambda: self.moveTo("forward")).grid(row=SetRow, column=3)
 			Button(self, text="Hoch", command=lambda: self.lookTo(2)).grid(row=SetRow, column=6)
+			
+			self.slider_target = Scale(self, orient='horizontal', from_=0, to=500, length=slider_Length, command=self.update)
+			self.slider_target.grid(row=SetRow, column=7, columnspan=2)
+			self.slider_target.set(100)
+			self.targetLabel=Label(self, text="Ziel")
+			self.targetLabel.grid(row=SetRow, column=9)
 			SetRow+=1
 			Button(self, text="V 300", command=lambda: self.moveTo("mf300")).grid(row=SetRow, column=3)
 			SetRow+=1
 			Button(self, text="V 50", command=lambda: self.moveTo("mf50")).grid(row=SetRow, column=3)
+			self.slider_threshold = Scale(self, orient='horizontal', from_=0, to=500, length=slider_Length, command=self.update)
+			self.slider_threshold.grid(row=SetRow, column=7, columnspan=2)
+			self.slider_threshold.set(100)
 			self.leftAngle=StringVar()
 			Entry(self,textvariable=self.leftAngle,width=4).grid(row=SetRow, column=0)
 			self.leftAngle.set("180")
 			self.rightAngle=StringVar()
 			Entry(self,textvariable=self.rightAngle,width=4).grid(row=SetRow, column=6)
 			self.rightAngle.set("180")
+			self.threshLabel=Label(self, text="Licht")
+			self.threshLabel.grid(row=SetRow, column=9)
 			SetRow+=1
 			SetCol=0
 			Button(self, text="Links", command=lambda: self.moveTo("left")).grid(row=SetRow, column=SetCol)
@@ -65,10 +80,17 @@ class Window(Frame):
 			Button(self, text="R 90°", command=lambda: self.moveTo("tr90")).grid(row=SetRow, column=SetCol)
 			SetCol+=1
 			Button(self, text="Rechts", command=lambda: self.moveTo("right")).grid(row=SetRow, column=SetCol)
+			
 			SetRow+=1
 			Button(self, text="Z 50", command=lambda: self.moveTo("mb50")).grid(row=SetRow, column=3)
+			self.slider_rotation = Scale(self, orient='horizontal', from_=0, to=100, length=slider_Length, command=self.update)
+			self.slider_rotation.grid(row=SetRow, column=7, columnspan=2)
+			self.slider_rotation.set(30)
+			self.rotationLabel=Label(self, text="Drehung")
+			self.rotationLabel.grid(row=SetRow, column=9)
 			SetRow+=1
 			Button(self, text="Z 300", command=lambda: self.moveTo("mb300")).grid(row=SetRow, column=3)
+			
 			SetRow+=1
 			self.lightText=StringVar()
 			Button(self, textvariable=self.lightText, command=self.lightSwitch).grid(row=SetRow, column=0)
@@ -78,6 +100,11 @@ class Window(Frame):
 			self.backwardDist.set("1000")
 			Button(self, text="Rueckwaerz", command=lambda: self.moveTo("backward")).grid(row=SetRow, column=3)
 			Button(self, text="Runter", command=lambda: self.lookTo(-2)).grid(row=SetRow, column=6)
+			self.slider_drive = Scale(self, orient='horizontal', from_=0, to=100, length=slider_Length, command=self.update)
+			self.slider_drive.grid(row=SetRow, column=7, columnspan=2)
+			self.slider_drive.set(50)
+			self.driveLabel=Label(self, text="Fahrt")
+			self.driveLabel.grid(row=SetRow, column=9)
 			SetRow+=1
 			SetCol=0
 			self.autoServoText=StringVar()
@@ -187,6 +214,12 @@ class Window(Frame):
 		print("update function command",commandNew)
 		guiCommands['move']=commandNew
 
+	def update(self,value):
+		guiCommands['targetsize']=self.slider_target.get()
+		guiCommands['threshold']=self.slider_threshold.get()
+		guiCommands['rotation']=self.slider_rotation.get()
+		guiCommands['drive']=self.slider_drive.get()
+		
 
 	def client_exit(self):
 		guiCommands['runVideo']=False
