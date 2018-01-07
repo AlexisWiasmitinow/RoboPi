@@ -9,6 +9,9 @@ from threading import Thread
 import time, multiprocessing, sys, getopt
 import numpy as np
 from GUI import *
+from espeak import espeak
+espeak.set_voice("de")
+
 
 vs = PiVideoStream((1296,736)).start()
 time.sleep(1)
@@ -31,6 +34,7 @@ t_gui=Thread(target=guiThread)
 t_gui.start()
 runVideo=True
 #for i in range(0,10):
+lastSpeak="bla"
 while (runVideo==True):
 	runVideo=guiCommands['runVideo']
 	scale_factor=0.5
@@ -39,7 +43,9 @@ while (runVideo==True):
 	frame = vs.read()
 	imageHeight,imageWidth=frame.shape[:2]
 	frame_small=cv2.resize(frame,(int(imageWidth*scale_factor),int(imageHeight*scale_factor)),interpolation = cv2.INTER_AREA)
-	grayImage = cv2.cvtColor(frame_small, cv2.COLOR_BGR2GRAY)
+	#grayImage = cv2.cvtColor(frame_small, cv2.COLOR_BGR2GRAY)
+	b,g,r=cv2.split(frame_small)
+	grayImage=r
 	imageHeight,imageWidth=grayImage.shape[:2]
 	#red=frame[0,0,100]
 	#cv2.imshow('Test',frame)
@@ -90,12 +96,19 @@ while (runVideo==True):
 		
 			if hOffset>0:
 				moveCommand="tr"+str(int(abs(hOffset*proportionality)))
+				#espeak.synth("Rechts")
+				Speak="rechts"
 			elif hOffset<0:
 				moveCommand="tl"+str(int(abs(hOffset*proportionality)))
+				#espeak.synth("Links")
+				Speak="links"
 			else:
 				moveCommand="none"
 			if moveCommand!='none' and int(moveCommand[2:])>0 and guiCommands['autoTurn']==True:
 				print("moveCommand turn: ",moveCommand)
+				if Speak != lastSpeak:
+					espeak.synth(Speak)
+				lastSpeak=Speak
 				ActorsQueue.put(moveCommand)
 			if guiCommands['autoServo']==True:
 				guiCommands['angle']+=vOffset*proportionality*0.1
@@ -107,10 +120,15 @@ while (runVideo==True):
 			proportionality2=0.02*guiCommands['drive']
 			if sizeOffset<0:
 				moveCommand="mb"+str(int(abs(sizeOffset*proportionality2)))
+				Speak="weg"
 			else:
 				moveCommand="mf"+str(int(abs(sizeOffset*proportionality2)))
+				Speak="hin"
 			if moveCommand!='none' and int(moveCommand[2:])>0 and guiCommands['autoRoll']==True:
 				print("moveCommand roll: ",moveCommand)
+				if Speak != lastSpeak:
+					espeak.synth(Speak)
+				lastSpeak=Speak
 				ActorsQueue.put(moveCommand)
 		elif  guiCommands['previewRaw']==True:
 			cv2.imshow('Vorschau',frame_small)
@@ -132,6 +150,7 @@ while (runVideo==True):
 	if cv2.waitKey(1) & 0xFF == ord('q'):
 		runVideo=False
 		break
+	time.sleep(0.1)
 
 lightOff()
 servoOff()

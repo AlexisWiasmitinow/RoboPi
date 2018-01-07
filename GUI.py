@@ -6,7 +6,9 @@ from PIL import Image, ImageTk
 import Queue
 import string
 from multiprocessing import Process, Value, Queue
-
+from espeak import espeak
+espeak.set_voice("de")
+espeak.synth("Hallo Welt, ich bin bereit!")
 guiCommands={}
 guiCommands['move']='none'
 guiCommands['light']=False
@@ -47,7 +49,7 @@ class Window(Frame):
 			
 			self.slider_target = Scale(self, orient='horizontal', from_=0, to=500, length=slider_Length, command=self.update)
 			self.slider_target.grid(row=SetRow, column=7, columnspan=2)
-			self.slider_target.set(100)
+			self.slider_target.set(50)
 			self.targetLabel=Label(self, text="Ziel")
 			self.targetLabel.grid(row=SetRow, column=9)
 			SetRow+=1
@@ -56,7 +58,7 @@ class Window(Frame):
 			Button(self, text="V 50", command=lambda: self.moveTo("mf50")).grid(row=SetRow, column=3)
 			self.slider_threshold = Scale(self, orient='horizontal', from_=0, to=500, length=slider_Length, command=self.update)
 			self.slider_threshold.grid(row=SetRow, column=7, columnspan=2)
-			self.slider_threshold.set(100)
+			self.slider_threshold.set(50)
 			self.leftAngle=StringVar()
 			Entry(self,textvariable=self.leftAngle,width=4).grid(row=SetRow, column=0)
 			self.leftAngle.set("180")
@@ -133,8 +135,10 @@ class Window(Frame):
 		print("preview Status",guiCommands['previewRaw'])
 		if guiCommands['previewRaw']==True:
 			self.previewText.set("Vorschau Aus")
+			espeak.synth("Vorschau An")
 		else:
 			self.previewText.set("Vorschau An")
+			espeak.synth("Vorschau Aus")
 			
 	def lightSwitch(self):
 		guiCommands['light']= not guiCommands['light']
@@ -142,32 +146,40 @@ class Window(Frame):
 		if guiCommands['light']==True:
 			lightOn()
 			self.lightText.set("Licht Aus")
+			espeak.synth("Licht An")
 		else:
 			lightOff()
 			self.lightText.set("Licht An")
+			espeak.synth("Licht Aus")
 	def autoServoSwitch(self):
 		guiCommands['autoServo']= not guiCommands['autoServo']
 		print("autoServo Status",guiCommands['autoServo'])
 		if guiCommands['autoServo']==True:
 			self.autoServoText.set("Schau Aus")
+			espeak.synth("Schauen An")
 		else:
 			self.autoServoText.set("Schauen")
+			espeak.synth("Schauen Aus")
 			
 	def autoRollSwitch(self):
 		guiCommands['autoRoll']= not guiCommands['autoRoll']
 		print("autoRoll Status",guiCommands['autoRoll'])
 		if guiCommands['autoRoll']==True:
 			self.autoRollText.set("Roll Aus")
+			espeak.synth("Rollen An")
 		else:
 			self.autoRollText.set("Rollen")
+			espeak.synth("Rollen Aus")
 			guiCommands['emptyCommandQueue']=True
 	def autoTurnSwitch(self):
 		guiCommands['autoTurn']= not guiCommands['autoTurn']
 		print("autoTurn Status",guiCommands['autoTurn'])
 		if guiCommands['autoTurn']==True:
 			self.autoTurnText.set("Dreh Aus")
+			espeak.synth("Drehen An")
 		else:
 			self.autoTurnText.set("Drehen")
+			espeak.synth("Drehen Aus")
 			guiCommands['emptyCommandQueue']=True
 	
 	def lookTo(self,command):
@@ -224,5 +236,7 @@ class Window(Frame):
 	def client_exit(self):
 		guiCommands['runVideo']=False
 		print("exit pressed")
+		espeak.synth("Beenden")
+		time.sleep(1)
 		#SetLightTo(0)
 		exit()

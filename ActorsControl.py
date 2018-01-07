@@ -26,7 +26,7 @@ GPIO.setup(servoEnablePin,GPIO.OUT)
 GPIO.output(servoEnablePin, 1)
 
 debugActors=False
-debugActors2=True
+debugActors2=False
 
 def DeleteImages(ControlImagePath):
 	#os.system("rm control_images/turn_* 2> /dev/null 1> /dev/null")
